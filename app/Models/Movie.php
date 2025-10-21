@@ -10,4 +10,7 @@ class Movie extends Model
     use SoftDeletes;
 
     protected $fillable = ['title','genre','duration','director','description','age_rating','poster','activated'];
+    public function schedules() {
+        return $this->hasMany(Schedule::class);
+    }
 }

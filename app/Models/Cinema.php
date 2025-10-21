@@ -11,4 +11,10 @@ class Cinema extends Model
     use SoftDeletes;
 
     protected $fillable = ['name','location'];
+    // mendefinisikan relasi karna schedule nya itu many jadi jamak
+    public function schedules() {
+        // hasMany() = one to many
+        // hasOne() = one to one
+        return $this->hasMany(Schedule::class);
+    }
 }

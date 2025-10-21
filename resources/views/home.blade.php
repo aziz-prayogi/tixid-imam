@@ -114,39 +114,20 @@
         <a href="#" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>Cinepolis</small></a>
     </div>
     <div class="d-flex justify-content-center gap-2 my-3">
-        <div class="card" style="width: 13rem;">
-            <img src="https://asset.tix.id/wp-content/uploads/2025/07/d8b1ece7-68b4-4958-a74b-e3925d63b475.webp" class="card-img-top" alt="testimoni">
+        @foreach ($movies as $movie)
+        <div class="card" style="width: 13rem">
+            <img src="{{ asset('storage/'. $movie->poster) }}" class="card-img-top" alt="{{ $movie->title }}" style="height: 30px ; object-fit: cover;">
             <div class="card-body" style="padding: 0 !important">
                 <p class="card-text text-center bg-primary py-2">
-                    <a href="#" class="text-warning"><b>beli tiket</b></a>
+                    <a href="{{ route('schedules.detail', $movie->id) }}">
+                        <b>beli tiket</b>
+                    </a>
                 </p>
             </div>
         </div>
-        <div class="card" style="width: 13rem;">
-            <img src="https://asset.tix.id/wp-content/uploads/2025/08/98b61540-970e-45d2-bb6e-5574dcb71ee4.webp " class="card-img-top" alt="testimoni">
-            <div class="card-body" style="padding: 0 !important">
-                <p class="card-text text-center bg-primary py-2">
-                    <a href="#" class="text-warning"><b>beli tiket</b></a>
-                </p>
-            </div>
-        </div>
-        <div class="card" style="width: 13rem;">
-            <img src="https://asset.tix.id/wp-content/uploads/2025/07/58c5c13f-18fc-42b0-a20a-67555f18deef.webp" class="card-img-top" alt="testimoni">
-            <div class="card-body" style="padding: 0 !important">
-                <p class="card-text text-center bg-primary py-2">
-                    <a href="{{ route('schedules.detail') }}" class="text-warning"><b>beli tiket</b></a>
-                </p>
-            </div>
-        </div>
-        <div class="card" style="width: 13rem;">
-            <img src="https://asset.tix.id/wp-content/uploads/2025/08/0f3dcf97-2f5d-4310-8648-f196b320066b.webp " class="card-img-top" alt="testimoni">
-            <div class="card-body" style="padding: 0 !important">
-                <p class="card-text text-center bg-primary py-2">
-                    <a href="#" class="text-warning"><b>beli tiket</b></a>
-                </p>
-            </div>
-        </div>
+        @endforeach
     </div>
+
 </div>
 
 <footer class="bg-body-tertiary text-center text-lg-start mt-5">

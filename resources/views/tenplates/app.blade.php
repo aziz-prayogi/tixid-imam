@@ -56,15 +56,22 @@
                                 </li>
                             </ul>
                         </li>
+                    @elseif(Auth::check() && Auth::user()->role == 'staff')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('staff.schedules.index') }}">Jadwal tiket</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('staff.promos.index') }}">Promo</a>
+                        </li>
                     @else
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('home') }}">beranda</a>
+                            <a class="nav-link" href="{{ route('home') }}">Beranda</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">bioskop</a>
+                            <a class="nav-link" href="#">Bioskop</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">tiket</a>
+                            <a class="nav-link" href="#">Tiket</a>
                         </li>
                     @endif
                 </ul>
@@ -102,6 +109,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
         integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous">
     </script>
+
+    @stack('script')
 </body>
 
 

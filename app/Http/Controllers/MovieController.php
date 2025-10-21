@@ -6,6 +6,9 @@ use App\Models\Movie;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MovieExport;
+use App\Models\Schedule;
 
 class MovieController extends Controller
 {
@@ -32,10 +35,29 @@ class MovieController extends Controller
         return view('home', compact('movies'));
     }
 
-    public function homeMovies()
+    public function homeMovies(Request $request)
     {
-        $movies = Movie::where('activated', 1)->orderBy('created_at', 'desc')->get();
+        //pengambilan data dari input form search
+        //name inputnya name="search_movei"
+        $nameMovie = $request -> search_movie;
+        // jika nameMovie (input search diisi, tidak kosong)
+        if ($nameMovie != "") {
+            //LIKE : mencari data yang mitip/mengandung teks yang diminta
+            // %  depan : mencari kata belakang, % belakang : mencari kata depan, % depan belakang : mencari dari kata depan belakang
+            $movie = Movie::where('title','like','%',$nameMovie,'%') -> where
+             ('activated', 1)->orderBy('created_at','DESC')->get();
+        } else {
+            $movies = Movie::where('activated', 1)->orderBy('created_at', 'desc')->get();
+        }
+
+        //$movies = Movie::where('activated', 1)->orderBy('created_at', 'desc')->get();
         return view('movies', compact('movies'));
+    }
+
+     public function movieSchedule($movie_id)
+    {
+        $movie = Movie::where('id', $movie_id)->with(['schedules', 'schedules.cinema'])->first();
+        return view('schedule.detail-film', compact('movie'));
     }
 
     public function detail($id)
