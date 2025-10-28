@@ -2,6 +2,8 @@
     @section('content')
         <div class="container my-5">
             <div class="d-flex justify-content-end">
+                <a href="{{ route('admin.movies.export') }}" class="btn btn-secondary me-2">Export</a>
+                <a href="{{ route('admin.movies.trash') }}" class="btn btn-secondary me-2">Data Sampah</a>
                 <a href="{{ route('admin.movies.create') }}" class="btn btn-success">Tambah Data</a>
             </div>
 
@@ -47,7 +49,7 @@
                             {{-- Tombol toggle --}}
                             <form action="{{ route('admin.movies.toggle', $item['id']) }}" method="POST" class="ms-2">
                                 @csrf
-                                @method('PUT')
+                                @method('PATCH')
                                 @if ($item['activated'] == 1)
                                     <button type="submit" class="btn btn-warning">Non-Aktif Film</button>
                                 @endif
@@ -81,6 +83,21 @@
     {{-- Script --}}
     @push('script')
         <script>
+            $(function(){
+                $("#tableMobies").DataTable({
+                    processing: true, tanda load pas lagi proses pengambilan data
+                    serverSide: true, data di proses dibelakang (controller)
+                    ajax: "{{ route('admin.movies.datatables') }}",
+                    columns: [
+                        {data: 'DT_RoewIndex', name: 'DT_RowIndex', orderable: true, searchable: false},
+                        {data: 'ImgPoster', name: 'ImgPoster', orderable: false, searchable: false},
+                        {data: 'title', name: 'title', orderable: true, searchable: true},
+                        {data: 'activeBadge', name: 'activeBadge', orderable: true, searchable: true},
+                        {data: 'btnAction', name: 'btnActions', orderable: false, searchable: false},
+                    ]
+                })
+            })
+
             function showModal(item) {
                 // menyiapkan gambar
                 let image = "{{ asset('storage') }}" + "/" + item.poster;

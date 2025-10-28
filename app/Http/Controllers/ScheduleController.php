@@ -137,26 +137,8 @@ class ScheduleController extends Controller
     public function destroy(Request $request, Schedule $schedule, $id)
     {
         //
-        $request->validate([
-            'price' => 'required|numeric',
-            'hours.*' => 'required|date_format:H:i'
-        ], [
-            'price.required' => 'harga harus diisi',
-            'price.numeric' => 'harga harus diisi dengan angka',
-            'hours.*.required' => 'jam tayang harus diisi',
-            'hours.*.date_format' => 'jam tayang harus diisi dengan format jam:menit',
-        ]);
-
-        $updateData = Schedule::where('id', $id)->update([
-            'price' => $request->price,
-            'hours' => $request->hours
-        ]);
-
-        if($updateData) {
-            return redirect()->route('staff.schedules.index')->with('success', 'berhasil mengubah data');
-        } else {
-            return redirect()->back()->with('error', 'gagal coba lagi');
-        }
+        Schedule::where('id', $id)->delete();
+        return redirect()->route('staff.schedules.index')->with('success', 'berhasil menghapus data');
     }
 
     public function trash() {

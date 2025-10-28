@@ -9,16 +9,63 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MovieExport;
 use App\Models\Schedule;
+use App\Models\Promo;
+use Yajra\DataTables\Facades\DataTables;
+
 
 class MovieController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
         $movies = Movie::all();
         return view('admin.movie.index', compact('movies'));
+    }
+
+    public function datatables() {
+        // jika data yang diambil tidak ada relasi gunakan query(), jika ada relasi gunakan with([]) : movie::with(['schedules'])
+        // query() : menyiapkan query eloquent model untuk dipake di datatables
+        $movies = Movie::query();
+        // of() : mengambil query eleqount dari model yang akan diproses datanya
+        return DataTables::of($movies)
+        // memunculkan angka 1 dst di table
+            ->addIndexColumn()
+        // addColumn('', function) : membuat column menyajikan data selain data asli dari db
+            ->addColumn('imgPoster', function($movie) {
+                $imgUrl = asset('storage/' . $movie['poster']);
+                return '<img src="' . $imgUrl . '" width="120"/>';
+            })
+            ->addColumn('activeBadge', function($movie) {
+                if ($movie['actived'] == 1) {
+                    return '<span class="badge badge-success">Aktif</span>';
+                } else {
+                    return '<span class="badge badge-secondary">Non-Aktif</span>';
+                }
+            })
+            ->addColumn('btnActions', function($movie) {
+                $btnDetail = '<button class="btn btn-secondary me-2" onclick=\'showModal(' .  json_encode($movie) . ')\'>Detail</button>';
+                $btnEdit = '<a href="' . route('admin.movies.edit', $movie['id']) . '" class="btn btn-primary me-2">Edit</a>';
+                $btnDelete = '<form action="'. route('admin.movies.delete', $movie['id']) .'" method="POST">' .
+                                    csrf_field() .
+                                    method_field('DELETE') .'
+                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                </form>';
+                if ($movie['actived'] == 1) {
+                    $btnNonAktif = '<form action="'. route('admin.movies.toggle', $movie['id']) .'" method="POST">' .
+                                        csrf_field() .
+                                        method_field('PATCH') .'
+                                        <button type="submit" class="btn btn-danger me-2">Non Aktif</button>
+                                    </form>';
+                } else {
+                    $btnNonAktif = '';
+                }
+                return '<div class="d-flex gap-2">' . $btnDetail . $btnEdit . $btnDelete . $btnNonAktif . '</div>';
+        })
+        ->rawColumns(['imgPoster', 'activeBadge', 'btnActions'])
+        ->make(true);
     }
 
     public function home()
@@ -228,7 +275,7 @@ class MovieController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy($id)
-{
+    {
     // findorFail() : mencari data berdasarkan id, jika tidak ada akan menampilkan error 404
     // storage::disk('public')->exists() : mengecek apakah file ada di folder storage
     // storage::disk('public')->delete() : menghapus file di folder storage
@@ -243,5 +290,30 @@ class MovieController extends Controller
     $movie->delete();
 
     return redirect()->route('admin.movies.index')->with('success', 'Berhasil menghapus data film!');
-}
+    }
+
+    public function exportExcel()
+    {
+        // nama file yang akan terunduh=
+        $fileName = 'data-film.xlsx';
+        // proses download
+        return Excel::download(new MovieExport, $fileName);
+    }
+
+    public function trash() {
+        $movieTrash = Movie::onlyTrashed()->get();
+        return view('admin.movie.trash', compact('movieTrash'));
+    }
+
+    public function restore($id) {
+        $movie = Movie::onlyTrashed()->find($id);
+        $movie->restore();
+        return redirect()->route('admin.movies.index')->with('success', 'berhasil mengembalikan data');
+    }
+
+    public function deletePermanent($id) {
+        $movie = Movie::onlyTrashed()->find($id);
+        $movie->forceDelete();
+        return redirect()->back()->with('success', 'berhasil menghapus permanen');
+    }
 }

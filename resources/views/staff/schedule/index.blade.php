@@ -22,8 +22,8 @@
                 <tr>
                     <td>{{$key + 1}}</td>
                     {{-- mengambil relasi $item['namarelasi']['data'] --}}
-                    <td>{{ $schedule['cinema']['name'] }}</td>
-                    <td>{{ $schedule['movie']['title'] }}</td>
+                    <td>{{ $schedule['cinema']['name'] ?? '-' }}</td>
+                    <td>{{ $schedule['movie']['title'] ?? '-' }}</td>
                     <td>
                         <ul>
                             {{-- karna hours array gunakan loop --}}

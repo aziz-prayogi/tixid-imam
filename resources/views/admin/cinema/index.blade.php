@@ -10,6 +10,8 @@
         @endif
         <div class="d-flex justify-content-end">
             <a href="{{ route('admin.cinemas.create') }}" class="btn btn-success"> tambah data</a>
+            <a href="{{ route('admin.cinemas.export') }}" class="btn btn-secondary me-2">Export</a>
+            <a href="{{ route('admin.cinemas.trash') }}" class="btn btn-secondary me-2">Data Sampah</a> 
         </div>
         <h5 class="mt-3">data bioskop</h5>
         <table class="table table-bordered">
