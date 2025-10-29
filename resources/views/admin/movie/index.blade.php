@@ -12,9 +12,14 @@
                     {{ Session::get('success') }}
                 </div>
             @endif
+            @if (Session::get('error'))
+                <div class="alert alert-danger">
+                    {{ Session::get('error') }}
+                </div>
+            @endif
 
             <h5 class="mb-3">Data Film</h5>
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="tableMovie">
                 <tr>
                     <th>#</th>
                     <th>Poster</th>
@@ -22,42 +27,6 @@
                     <th>Status Aktif</th>
                     <th>Aksi</th>
                 </tr>
-                @foreach ($movies as $key => $item)
-                    <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>
-                            <img src="{{ asset('storage/' . $item['poster']) }}" width="120">
-                        </td>
-                        <td>{{ $item['title'] }}</td>
-                        <td>
-                            @if ($item['activated'] == 1)
-                                <span class="badge badge-success">Aktif</span>
-                            @else
-                                <span class="badge badge-danger">Non-Aktif</span>
-                            @endif
-                        </td>
-                        <td class="d-flex">
-                            <button class="btn btn-secondary me-2" onclick="showModal({{ $item }})">Detail</button>
-                            <a href="{{ route('admin.movies.edit', $item['id']) }}" class="btn btn-primary me-2">Edit</a>
-
-                            <form action="{{ route('admin.movies.delete', $item['id']) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">Hapus</button>
-                            </form>
-
-                            {{-- Tombol toggle --}}
-                            <form action="{{ route('admin.movies.toggle', $item['id']) }}" method="POST" class="ms-2">
-                                @csrf
-                                @method('PATCH')
-                                @if ($item['activated'] == 1)
-                                    <button type="submit" class="btn btn-warning">Non-Aktif Film</button>
-                                @endif
-                            </form>
-                        </td>
-
-                    </tr>
-                @endforeach
             </table>
 
             <!-- Modal -->
@@ -84,16 +53,16 @@
     @push('script')
         <script>
             $(function(){
-                $("#tableMobies").DataTable({
-                    processing: true, tanda load pas lagi proses pengambilan data
-                    serverSide: true, data di proses dibelakang (controller)
+                $("#tableMovie").DataTable({
+                    processing: true, //tanda load pas lagi proses pengambilan data
+                    serverSide: true, //data di proses dibelakang (controller)
                     ajax: "{{ route('admin.movies.datatables') }}",
                     columns: [
-                        {data: 'DT_RoewIndex', name: 'DT_RowIndex', orderable: true, searchable: false},
+                        {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                         {data: 'ImgPoster', name: 'ImgPoster', orderable: false, searchable: false},
                         {data: 'title', name: 'title', orderable: true, searchable: true},
                         {data: 'activeBadge', name: 'activeBadge', orderable: true, searchable: true},
-                        {data: 'btnAction', name: 'btnActions', orderable: false, searchable: false},
+                        {data: 'btnActions', name: 'btnActions', orderable: false, searchable: false},
                     ]
                 })
             })

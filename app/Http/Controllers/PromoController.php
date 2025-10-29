@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Schedule;
 use App\Exports\PromoExport;
+use Yajra\DataTables\Facades\DataTables;
 
 
 class PromoController extends Controller
@@ -18,6 +19,40 @@ class PromoController extends Controller
     {
         $promos = Promo::all();
         return view('staff.promo.index', compact('promos'));
+    }
+
+    public function datatables()
+    {
+        $promos = Promo::query(); // Mengambil semua data promo
+
+        return DataTables::of($promos)
+            ->addIndexColumn() // Menambahkan nomor urut (DT_RowIndex)
+
+            // Mengubah kolom discount menjadi format yang lebih mudah dibaca jika perlu
+            ->editColumn('discount', function(Promo $promo) {
+                // Contoh: Menampilkan diskon dengan tanda % atau Rp
+                if ($promo->type == 'percentage') {
+                    return $promo->discount . '%';
+                } else {
+                    return 'Rp ' . number_format($promo->discount, 0, ',', '.');
+                }
+            })
+
+            // Kolom kustom 'action' untuk tombol Edit, Delete, dll.
+            ->addColumn('action', function(Promo $promo) {
+                $btnEdit = '<a href="' . route('staff.promos.edit', $promo->id) . '" class="btn btn-primary btn-sm me-2">Edit</a>';
+
+                $btnDelete = '<form action="'. route('staff.promos.delete', $promo->id) .'" method="POST" style="display:inline;">' .
+                                    csrf_field() .
+                                    method_field('DELETE') .'
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin Hapus Promo: ' . $promo->promo_code . '?\')">Hapus</button>
+                                </form>';
+
+                return '<div class="d-flex">' . $btnEdit . $btnDelete . '</div>';
+            })
+
+            ->rawColumns(['action']) // Penting: Mengizinkan rendering HTML untuk kolom aksi
+            ->make(true);
     }
 
     /**

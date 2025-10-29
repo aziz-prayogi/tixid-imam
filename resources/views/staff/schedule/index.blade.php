@@ -10,7 +10,7 @@
         @if (Session::get('success'))
             <div class="alert alert-success">{{Session::get('success')}}</div>
         @endif
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="tableSchedule">
             <tr>
                 <th>#</th>
                 <th>Nama Bioskop</th>
@@ -18,30 +18,6 @@
                 <th>Jam Tayang</th>
                 <th>Aksi</th>
             </tr>
-            @foreach ($schedules as $key => $schedule)
-                <tr>
-                    <td>{{$key + 1}}</td>
-                    {{-- mengambil relasi $item['namarelasi']['data'] --}}
-                    <td>{{ $schedule['cinema']['name'] ?? '-' }}</td>
-                    <td>{{ $schedule['movie']['title'] ?? '-' }}</td>
-                    <td>
-                        <ul>
-                            {{-- karna hours array gunakan loop --}}
-                            @foreach ($schedule['hours'] as $hours)
-                                <li>{{$hours}}</li>
-                            @endforeach
-                        </ul>
-                    </td>
-                    <td class="d-flex">
-                            <a href="{{ route('staff.schedules.edit', $schedule->id) }}" class="btn btn-primary">Edit</a>
-                            <form action="{{ route('staff.schedules.delete', $schedule->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger ms-2">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
         </table>
     </div>
 
@@ -116,6 +92,21 @@
 
 @push('script')
     <script>
+        $(function(){
+            $("#tableSchedule").DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('staff.schedules.datatables') }}",
+                columns: [
+                    {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                    {data: 'cinema_name', name: 'cinema_name', orderable: true, searchable: true},
+                    {data: 'movie_title', name: 'movie_title', orderable: true, searchable: true},
+                    {data: 'hours_list', name: 'hours_list', orderable: true, searchable: true},
+                    {data: 'btnActions', name: 'btnActions', orderable: false, searchable: false},
+                ]
+            })
+        })
+
         function addInput() {
             let content = `<input type="time" name="hours[]" class="form-control mt-3">`;
             // panggil bagian yang akan diisi

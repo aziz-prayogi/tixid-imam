@@ -25,7 +25,7 @@ Route::get('/signup', function () {
 // 1. get : buat nampilin halamaan
 // 2. post : menambahkan data baru
 // 3. patch : mengubah data
-// 3. delete : menghapus data
+// 4. delete : menghapus data
 Route::post('/signup', [UserController::class, 'register'])
 ->name('signup.register');
 Route::post('/login', [UserController::class, 'loginAuth'])
@@ -45,6 +45,7 @@ Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function()
 
     // data film
     Route::prefix('/cinemas')->name('cinemas.')->group(function(){
+        Route::get('/datatables', [CinemaController::class, 'datatables'])->name('datatables');
         Route::get('/', [CinemaController::class, 'index'])
         ->name('index');
         Route::get('/create', [CinemaController::class, 'create'])
@@ -67,6 +68,7 @@ Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function()
 
     //data Pengguna admin dan staff
     Route::prefix('/users')->name('users.')->group(function() {
+        Route::get('/datatables', [UserController::class, 'datatables'])->name('datatables');
         Route::get('/', [UserController::class, 'index'])
         ->name('index');
         Route::get('/create', [UserController::class, 'create'])
@@ -113,6 +115,7 @@ Route::middleware('isStaff')->prefix('/staff')->name('staff.')->group(function()
     })->name('dashboard');
 
     Route::prefix('/promos')->name('promos.')->group(function() {
+        Route::get('/datatables', [PromoController::class, 'datatables'])->name('datatables');
         Route::get('/', [PromoController::class, 'index'])->name('index');
         Route::get('/create', [PromoController::class, 'create'])->name('create');
         Route::post('/store', [PromoController::class, 'store'])->name('store');
@@ -126,6 +129,7 @@ Route::middleware('isStaff')->prefix('/staff')->name('staff.')->group(function()
     });
 
     Route::prefix('/schedules')->name('schedules.')->group(function() {
+        Route::get('/datatables', [ScheduleController::class, 'datatables'])->name('datatables');
         Route::get('/', [ScheduleController::class, 'index'])->name('index');
         Route::post('store', [ScheduleController::class, 'store'])->name('store');
         Route::get('/edit/{id}', [ScheduleController::class, 'edit'])->name('edit');

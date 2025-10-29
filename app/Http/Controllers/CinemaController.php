@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\cinema;
+use App\Models\Cinema;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CinemaExport;
 use App\Models\Schedule;
+use Yajra\DataTables\Facades\DataTables;
 
 class CinemaController extends Controller
 {
@@ -20,7 +21,29 @@ class CinemaController extends Controller
         // mengirim data dari controller ke blade -> impact()
         // isi compact sama dengan nama variable
         // eloquent model
-        return view('admin.cinema.index', compact('Cinemas'));
+        return view('admin.cinema.index');
+    }
+
+    public function datatables()
+    {
+        $cinemas = Cinema::query(); // Menggunakan query() untuk efisiensi
+
+        return DataTables::of($cinemas)
+            ->addIndexColumn()
+            // Kolom 'btnActions' untuk tombol Edit, Delete, dll.
+            ->addColumn('btnActions', function(Cinema $cinema) {
+                $btnEdit = '<a href="' . route('admin.cinemas.edit', $cinema->id) . '" class="btn btn-primary btn-sm me-2">Edit</a>';
+
+                $btnDelete = '<form action="'. route('admin.cinemas.delete', $cinema->id) .'" method="POST" style="display:inline;">' .
+                                    csrf_field() .
+                                    method_field('DELETE') .'
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin Hapus Bioskop: ' . $cinema->name . '?\')">Hapus</button>
+                                </form>';
+
+                return '<div class="d-flex">' . $btnEdit . $btnDelete . '</div>';
+            })
+            ->rawColumns(['btnActions']) // Mengizinkan rendering HTML untuk kolom aksi
+            ->make(true);
     }
 
     /**

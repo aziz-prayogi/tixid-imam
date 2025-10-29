@@ -7,6 +7,7 @@ use App\Models\Movie;
 use App\Models\Cinema;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ScheduleExport;
+use Yajra\DataTables\Facades\DataTables;
 
 
 use Illuminate\Http\Request;
@@ -27,6 +28,60 @@ class ScheduleController extends Controller
         $schedules = Schedule::with(['cinema', 'movie'])->get();
 
         return view('staff.schedule.index', compact('cinemas', 'movies', 'schedules'));
+    }
+
+    public function datatables()
+    {
+        // Eager Loading: Ambil data jadwal dengan detail relasi cinema dan movie
+        $schedules = Schedule::with(['cinema', 'movie'])->get();
+
+        return DataTables::of($schedules)
+            ->addIndexColumn()
+
+            // Kolom kustom cinema_name (Sesuai permintaan 'cinema_name')
+            ->addColumn('cinema_name', function(Schedule $schedule) {
+                // Gunakan optional() untuk mencegah error jika relasi null
+                return optional($schedule->cinema)->name ?? '<span class="text-danger">N/A</span>';
+            })
+
+            // Kolom kustom movie_title (Sesuai permintaan 'movie_title')
+            ->addColumn('movie_title', function(Schedule $schedule) {
+                return optional($schedule->movie)->title ?? '<span class="text-danger">N/A</span>';
+            })
+
+            // Kolom kustom hours_list (Sesuai permintaan 'hours_list')
+            ->addColumn('hours_list', function(Schedule $schedule) {
+                // Asumsi hours disimpan sebagai array/JSON di DB
+                $hoursArray = $schedule->hours ?? [];
+                if (!is_array($hoursArray)) {
+                    // Coba decode jika masih berupa string JSON
+                    $hoursArray = json_decode($hoursArray, true) ?? [];
+                }
+
+                $list = '<ul>';
+                foreach ($hoursArray as $hour) {
+                    $list .= "<li>{$hour}</li>";
+                }
+                $list .= '</ul>';
+                return $list;
+            })
+
+            // Kolom kustom btnActions
+            ->addColumn('btnActions', function(Schedule $schedule) {
+                $btnEdit = '<a href="' . route('staff.schedules.edit', $schedule->id) . '" class="btn btn-primary btn-sm me-2">Edit</a>';
+
+                $btnDelete = '<form action="'. route('staff.schedules.delete', $schedule->id) .'" method="POST" style="display:inline;">' .
+                                    csrf_field() .
+                                    method_field('DELETE') .'
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin Hapus Jadwal?\')">Hapus</button>
+                                </form>';
+
+                return '<div class="d-flex">' . $btnEdit . $btnDelete . '</div>';
+            })
+
+            // Tentukan kolom mana yang mengembalikan HTML mentah
+            ->rawColumns(['cinema_name', 'movie_title', 'hours_list', 'btnActions'])
+            ->make(true);
     }
 
     /**

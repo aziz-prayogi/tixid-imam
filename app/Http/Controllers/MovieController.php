@@ -34,12 +34,12 @@ class MovieController extends Controller
         // memunculkan angka 1 dst di table
             ->addIndexColumn()
         // addColumn('', function) : membuat column menyajikan data selain data asli dari db
-            ->addColumn('imgPoster', function($movie) {
+            ->addColumn('ImgPoster', function($movie) {
                 $imgUrl = asset('storage/' . $movie['poster']);
                 return '<img src="' . $imgUrl . '" width="120"/>';
             })
             ->addColumn('activeBadge', function($movie) {
-                if ($movie['actived'] == 1) {
+                if ($movie['activated'] == 1) {
                     return '<span class="badge badge-success">Aktif</span>';
                 } else {
                     return '<span class="badge badge-secondary">Non-Aktif</span>';
@@ -53,7 +53,7 @@ class MovieController extends Controller
                                     method_field('DELETE') .'
                                     <button type="submit" class="btn btn-danger">Hapus</button>
                                 </form>';
-                if ($movie['actived'] == 1) {
+                if ($movie['activated'] == 1) {
                     $btnNonAktif = '<form action="'. route('admin.movies.toggle', $movie['id']) .'" method="POST">' .
                                         csrf_field() .
                                         method_field('PATCH') .'
@@ -64,7 +64,7 @@ class MovieController extends Controller
                 }
                 return '<div class="d-flex gap-2">' . $btnDetail . $btnEdit . $btnDelete . $btnNonAktif . '</div>';
         })
-        ->rawColumns(['imgPoster', 'activeBadge', 'btnActions'])
+        ->rawColumns(['ImgPoster', 'activeBadge', 'btnActions'])
         ->make(true);
     }
 
@@ -94,16 +94,35 @@ class MovieController extends Controller
             $movie = Movie::where('title','like','%',$nameMovie,'%') -> where
              ('activated', 1)->orderBy('created_at','DESC')->get();
         } else {
-            $movies = Movie::where('activated', 1)->orderBy('created_at', 'desc')->get();
+            $movies = Movie::where('activated', 1)->orderBy('created_at', 'DESC')->get();
         }
 
         //$movies = Movie::where('activated', 1)->orderBy('created_at', 'desc')->get();
         return view('movies', compact('movies'));
     }
 
-     public function movieSchedule($movie_id)
+     public function movieSchedule($movie_id, Request $request)
     {
-        $movie = Movie::where('id', $movie_id)->with(['schedules', 'schedules.cinema'])->first();
+        $sortirHarga = $request->sortirHarga;
+        if ($sortirHarga) {
+            $movie = Movie::where('id', $movie_id)->with(['schedules' => function($q) use ($sortirHarga) {
+                $q->orderBy('price', $sortirHarga);
+
+            }, 'schedules.cinema'])->first();
+        } else {
+            $movies = Movie::where('id', $movie_id )->with(['schedules', 'schedules.cinema'])->first();
+        }
+
+        $sortirAlfabet = $request->sortirAlfabet;
+        if ($sortirAlfabet == 'ASC') {
+            $movie->schedules = $movie->schedules->sortBy(function($schedule) {
+                return $schedule->cinema->name;
+            })->values();
+        } elseif ($sortirAlfabet == 'DESC') {
+            $movie->schedules = $movie->schedules->sortByDesc(function($schedule) {
+                return $schedule->cinema->name;
+            })->values();
+        }
         return view('schedule.detail-film', compact('movie'));
     }
 
@@ -279,6 +298,10 @@ class MovieController extends Controller
     // findorFail() : mencari data berdasarkan id, jika tidak ada akan menampilkan error 404
     // storage::disk('public')->exists() : mengecek apakah file ada di folder storage
     // storage::disk('public')->delete() : menghapus file di folder storage
+    $schedules = Schedule::where('movie_id', $id)->count();
+        if ($schedules) {
+            return redirect()->route('admin.movies.index')->with('error', 'tidak dapat menghapus data film data tertaut dengan jadwal tayang');
+        }
     $movie = Movie::findOrFail($id);
 
     // hapus file poster dari storage kalau ada

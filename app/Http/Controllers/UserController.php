@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\Facades\DataTables;
+use App\Exports\UserExport;
 
 class UserController extends Controller
 {
@@ -70,6 +73,36 @@ class UserController extends Controller
 
     }
 
+    public function datatables()
+    {
+        // 1. Ambil data pengguna. Gunakan query() untuk efisiensi
+        $users = User::query();
+
+        return DataTables::of($users)
+            // Tambahkan kolom penomor (No. urut)
+            ->addIndexColumn()
+
+            // Kolom kustom 'action' (sesuai permintaan DataTables)
+            ->addColumn('action', function(User $user) {
+                // Definisikan tombol aksi di sini
+                $btnEdit = '<a href="' . route('admin.users.edit', $user->id) . '" class="btn btn-primary btn-sm me-2">Edit</a>';
+
+                // Form Hapus (menggunakan method DELETE)
+                $btnDelete = '<form action="'. route('admin.users.delete', $user->id) .'" method="POST" style="display:inline;">' .
+                                    csrf_field() . // Token CSRF
+                                    method_field('DELETE') .'
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin Hapus Pengguna: ' . $user->name . '?\')">Hapus</button>
+                                </form>';
+
+                // Mengembalikan HTML untuk kolom 'action'
+                return '<div class="d-flex">' . $btnEdit . $btnDelete . '</div>';
+            })
+
+            // Tentukan kolom mana yang mengembalikan HTML mentah (kolom 'action')
+            ->rawColumns(['action'])
+
+            ->make(true);
+    }
 
     public function loginAuth(Request $request)
     {
@@ -194,8 +227,36 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
-        User::where('id',$id)->delete();
-        return redirect()->back()->with('success','user berhasil dihapus');
+        $user = User::find($id);
+
+    if ($user) {
+        $user->delete(); // soft delete
+        return redirect()->route('admin.users.index')->with('success', 'Berhasil menghapus data (soft delete)');
+    } else {
+        return redirect()->route('admin.users.index')->with('error', 'User tidak ditemukan');
+    }
+    }
+
+    public function exportExcel()
+    {
+        $fileName = 'data-pengguna.xlsx';
+        return Excel::download(new UserExport, $fileName);
+    }
+
+    public function trash() {
+        $userTrash = User::onlyTrashed()->get();
+        return view('admin.user.trash', compact('userTrash'));
+    }
+
+    public function restore($id) {
+        $user = User::onlyTrashed()->find($id);
+        $user->restore();
+        return redirect()->route('admin.users.index')->with('success', 'data berhasil dikembalikkan');
+    }
+
+    public function deletePermanent($id) {
+        $user = User::onlyTrashed()->find($id);
+        $user->forceDelete();
+        return redirect()->back()->with('success', 'berhasil hapus data secara permanen');
     }
 }

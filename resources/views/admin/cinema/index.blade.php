@@ -8,36 +8,42 @@
             </div>
 
         @endif
+        @if (Session::get('error'))
+                <div class="alert alert-danger">
+                    {{ Session::get('error') }}
+                </div>
+        @endif
         <div class="d-flex justify-content-end">
             <a href="{{ route('admin.cinemas.create') }}" class="btn btn-success"> tambah data</a>
             <a href="{{ route('admin.cinemas.export') }}" class="btn btn-secondary me-2">Export</a>
-            <a href="{{ route('admin.cinemas.trash') }}" class="btn btn-secondary me-2">Data Sampah</a> 
+            <a href="{{ route('admin.cinemas.trash') }}" class="btn btn-secondary me-2">Data Sampah</a>
         </div>
         <h5 class="mt-3">data bioskop</h5>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="tablecinema">
             <tr>
                 <th>#</th>
                 <th>Nama bioskop</th>
                 <th>Lokasi</th>
                 <th>aksi</th>
             </tr>
-            {{-- $cinemas dari compact --}}
-            {{-- foreach karena $cinemas pake :: all()  --}}
-            @foreach ($Cinemas as $key => $item)
-                <tr>
-                    <td>{{$key+1}}</td>
-                    <td>{{$item['name']}}</td>
-                    <td>{{$item['location']}}</td>
-                    <td class="d-flex">
-                        <a href="{{ route('admin.cinemas.edit', $item['id']) }}" class="btn btn-secondary">Edit</a>
-                        <form action="{{ route('admin.cinemas.delete', $item['id']) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
         </table>
     </div>
 @endsection
+
+@push('script')
+    <script>
+        $(function(){
+            $("#tablecinema").DataTable({
+                processing: true, //tanda load pas lagi proses pengambilan data
+                serverSide: true, //data di proses dibelakang (controller)
+                ajax: "{{ route('admin.cinemas.datatables') }}",
+                columns: [
+                    {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                    {data: 'name', name: 'name', orderable: true, searchable: true},
+                    {data: 'location', name: 'location', orderable: true, searchable: true},
+                    {data: 'btnActions', name: 'btnActions', orderable: false, searchable: false},
+                ]
+            })
+        })
+    </script>
+@endpush
