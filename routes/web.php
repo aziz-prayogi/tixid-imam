@@ -4,6 +4,7 @@ use App\Http\Controllers\CinemaController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PromoController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -11,8 +12,14 @@ use Illuminate\Support\Facades\Route;
 // beranda
 Route::get('/', [MovieController::class, 'home'])->name('home');
 Route::get('/movies/active', [MovieController::class, 'homeMovies'])->name('home.movies.active');
-
+Route::get('/schedules/list', [CinemaController::class, 'cinemaList'])->name('cinemas_list');
 Route::get('/schedules/{movie_id}', [MovieController::class, 'movieSchedule'])->name('schedules.detail');
+Route::get('/schedules/{cinema_id}/schedules', [CinemaController::class, 'cinemaSchedules'])->name('cinemas');
+Route::get('/schedules/{scheduleId}/hours/{hourId}/ticket', [TicketController::class, 'showSeats'])->name('schedules.show_seats');
+
+Route::middleware('isUser')->group(function () {
+    Route::get('/schedules/{scheduleId}/hours/{hourId}/ticket', [TicketController::class, 'showSeats'])->name('schedules.show_seats');
+});
 
 Route::get('/login', function () {
     return view('auth.login');

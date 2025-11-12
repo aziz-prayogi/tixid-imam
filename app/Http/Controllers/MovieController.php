@@ -101,30 +101,50 @@ class MovieController extends Controller
         return view('movies', compact('movies'));
     }
 
-     public function movieSchedule($movie_id, Request $request)
-    {
-        $sortirHarga = $request->sortirHarga;
-        if ($sortirHarga) {
-            $movie = Movie::where('id', $movie_id)->with(['schedules' => function($q) use ($sortirHarga) {
-                $q->orderBy('price', $sortirHarga);
+     public function movieSchedule($movie_id, Request $request){
 
-            }, 'schedules.cinema'])->first();
-        } else {
-            $movies = Movie::where('id', $movie_id )->with(['schedules', 'schedules.cinema'])->first();
-        }
+    $sortirHarga = $request->sortirHarga;
 
-        $sortirAlfabet = $request->sortirAlfabet;
-        if ($sortirAlfabet == 'ASC') {
-            $movie->schedules = $movie->schedules->sortBy(function($schedule) {
-                return $schedule->cinema->name;
-            })->values();
-        } elseif ($sortirAlfabet == 'DESC') {
-            $movie->schedules = $movie->schedules->sortByDesc(function($schedule) {
-                return $schedule->cinema->name;
-            })->values();
-        }
-        return view('schedule.detail-film', compact('movie'));
+    if($sortirHarga){
+        // with(['namarelasi'=> function($q) {...} : melakukan flitter di relasi])\
+        $movie = Movie::where('id',$movie_id)->with(['schedules'=> function($q)
+        use($sortirHarga){
+            // $q mewakilkan query yang artinya model Schedule
+            // karna $sortirHarga ada di luar function($q) jdi import pake use()
+            $q->orderBy('price',$sortirHarga);
+
+        }, 'schedules.cinema'])->first();
+    }else{
+      // ambil data
+    // karena cinema relasi adanya di schedules.jdi withnya schedules.cinemax
+    //
+    $movie= Movie::where('id',$movie_id)->with(['schedules','schedules.cinema'])->first();
     }
+
+    $sortirAlfabet=$request->sortirAlfabet;
+    if($sortirAlfabet=='ASC'){
+        // karena alfabet dari nama di cinema, cinema  di 'schedule.cinema' (cinema relasi ke dua) jadi
+        // gunakan collection untuk no urutnya
+        // $movie->schedules : menagmbil dari dari $movie diatas bagian data schedules nya
+        $movie->schedules = $movie->schedules->sortBy(function($schedule){
+            // sortBy: mengurutkan collection (hasil pengambilan data ) secara ASC
+            // diurutkan berdasarkan data di return (data nama dari cinema, cinema dari relasi schedule)
+            return $schedule->cinema->name;
+        })->values(); //ambil ulang data dari hasil sortir : value()
+    }elseif($sortirAlfabet=='DESC'){
+        $movie->schedules = $movie->schedules->sortByDesc(function($schedule){
+            // sortbyDesc : mengurutkan collection (hasil pengambilan dat
+            // a ) secara DDESC
+            return $schedule->cinema->name;
+        })->values();
+    }
+
+     return view('schedule.detail-film',compact('movie'));
+    //  orderBy : ngurutin query elequent
+    // orderSort : ngurutin pake collection relasi ke 2
+    // harus sesuai ururtan kalo gak ada query elequent gak bakal ada collection
+
+}
 
     public function detail($id)
     {

@@ -162,4 +162,17 @@ class CinemaController extends Controller
         $cinema->forceDelete();
         return redirect()->back()->with('success', 'berhasil menghapus data secara permanen');
     }
+
+    public function cinemaList() {
+        $cinemas = Cinema::all();
+        return view('schedule.cinema', compact('cinemas'));
+    }
+
+    public function cinemaSchedules($cinema_id) {
+    $schedules = Schedule::where('cinema_id', $cinema_id)->with('movie')->whereHas('movie', function($q){
+        $q->where('activated', 1);
+    })->get();
+
+    return view('schedule.cinema-schedules', compact('schedules'));
+}
 }

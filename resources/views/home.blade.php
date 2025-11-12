@@ -104,22 +104,22 @@
             </h5>
         </div>
         <div>
-            <a href="#" class="btn btn-warning rounded-pill">semua</a>
+            <a href="{{ route('home.movies.active') }}" class="btn btn-warning rounded-pill">semua</a>
         </div>
     </div>
     <div class="d-flex my-3 gap-2">
-        <a href="#" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>semua film</small></a>
+        <a href="{{ route('home.movies.active') }}" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>semua film</small></a>
         <a href="#" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>XXI</small></a>
         <a href="#" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>CGV</small></a>
         <a href="#" class="btn btn-outline-primary rounded-pill" style="padding: 5px 10px !important"><small>Cinepolis</small></a>
     </div>
     <div class="d-flex justify-content-center gap-2 my-3">
         @foreach ($movies as $movie)
-        <div class="card" style="width: 13rem">
-            <img src="{{ asset('storage/'. $movie->poster) }}" class="card-img-top" alt="{{ $movie->title }}" style="height: 30px ; object-fit: cover;">
+        <div class="card" style="width: 13rem;">
+            <img src="{{ asset('storage/'. $movie->poster) }}" class="card-img-top" alt="{{ $movie->title }}" style="height: 300px ; object-fit: cover;">
             <div class="card-body" style="padding: 0 !important">
                 <p class="card-text text-center bg-primary py-2">
-                    <a href="{{ route('schedules.detail', $movie->id) }}">
+                    <a href="{{ route('schedules.detail', $movie->id) }}" class="text-warning">
                         <b>beli tiket</b>
                     </a>
                 </p>

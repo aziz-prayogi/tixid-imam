@@ -66,34 +66,101 @@
                         <li><a href="" class="dropdown-item">Jakarta Barat</a></li>
                     </ul>
                 </div>
+                @php
+                    // ambil query params : request()->get('namaquery')
+                    // kalau di url ada ?sortirharga dan nilainya asc ganti jadi desc
+                    if (request()->get('sortirHarga') == "ASC") {
+                        $sortirHarga = "DESC";
+                    } elseif (request()->get('sortirHarga') == "DESC") {
+                        $sortirHarga = "ASC";
+                    } else {
+                        $sortirHarga = "ASC";
+                    }
+
+                    if (request()->get('sortirAlfabet') == "ASC") {
+                        $sortirAlfabet = "DESC";
+                    } elseif (request()->get('sortirAlfabet') == "DESC") {
+                        $sortirAlfabet = "ASC";
+                    } else {
+                        $sortirAlfabet = "ASC";
+                    }
+
+
+                @endphp
                 <div class="dropdown">
                     <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         Sortir
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a href="" class="dropdown-item">Harga</a></li>
-                        <li><a href="" class="dropdown-item">Alfabet</a></li>
+                        <li><a href="?sortirHarga={{ $sortirHarga }}" class="dropdown-item">Harga</a></li>
+                        <li><a href="?sortirAlfabet={{ $sortirAlfabet }}" class="dropdown-item">Alfabet</a></li>
                     </ul>
                 </div>
             </div>
             <div class="mb-5">
                 @foreach ($movie['schedules'] as $schedule)
                 <div class="w-100 my-3">
-                    <i class="fa-solid fa-building"></i><b class="ms-2">{{$schedule['cinema']['name']}}</b>
+                    <i class="fa-solid fa-building"></i><zb class="ms-2">{{$schedule['cinema']['name']}}</b>
                     <br>
                     <small class="ms-3">{{$schedule['cinema']['location']}}</small>
                     <div class="d-flex gap-3 ps-3 my-2">
-                        @foreach ($schedule['hours'] as $hours)
-                        <div class="btn btn-outline-secondary">{{$hours}}</div>
+                        @foreach ($schedule['hours'] as $index => $hours)
+                        {{-- this : mengirim elemnt html yang di klik ke js nya --}}
+                        <div class="btn btn-outline-secondary" onclick="selectedHour('{{$schedule->id}}','{{$index}}', this)">{{$hours}}</div>
                         @endforeach
                     </div>
                 </div>
                 @endforeach
                 <hr>
-                <div class="w-100 p-2 bg-light text-center fixed-buttom">
-                    <a href=""><i class="fa solid fa-ticket"></i> BELI TIKET</a>
+                <div class="w-100 p-2 text-center fixed-bottom" id="btn-wrapper">
+                    <a href="" id="btn-ticket"><i class="fa solid fa-ticket"></i> BELI TIKET</a>
                 </div>
             </div>
         </div>
     @endsection
+
+    @push('script')
+        <script>
+            let selectedHours = null;
+            let selectedSchedule = null;
+            let lastClickedElement = null;
+
+            function selectedHour(scheduleId, hourId, el) {
+                // memindahkan data dari parameter ke var luar
+                selectedHours = hourId; // perubahan nama dari selectedHour ke selectedHours hanya untuk menghindari bentrok nama fungsi dan variabel
+                selectedSchedule = scheduleId;
+
+                //memberikan sryling warna ke kotak jam (element yang di klik)
+                if (lastClickedElement) {
+                    // kalau ada jam sebelumnya yang dipilih, jam sebelumnya dikembalikan ke tanpna warna
+                    lastClickedElement.style.background = "";
+                    lastClickedElement.style.color = "";
+                    lastClickedElement.style.borderColor = "";
+                }
+                // beri warna ke element yang baru diklik
+                el.style.background = "#112646"; // warna biru
+                el.style.color = "white";
+                el.style.borderColor = "#112646";
+                // update lastClickedElement ke el baru
+                lastClickedElement = el;
+
+                let btnWrapper = document.querySelector("#btn-wrapper");
+                let btnTicket = document.querySelector("#btn-ticket");
+
+                btnWrapper.style.background = "#112646"; // warna biru
+                btnTicket.style.color = "white";
+                btnWrapper.style.borderColor = "#112646";
+
+                //set url
+                let url = "{{ route('schedules.show_seats', ['scheduleId' => ':schedule', 'hourId' => ':hour']) }}"
+                .replace(':schedule', scheduleId)
+                .replace(':hour', hourId);
+                // .replace ->mengganti :schedule dan :hour menjadi data yang sebenernya
+                // isi href pada a beli TIKET
+                btnTicket.href = url;
+
+            }
+        </script>
+
+    @endpush
