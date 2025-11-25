@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tickets_payments', function (Blueprint $table) {
+        Schema::create('ticket_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->constrained('tickets');
             $table->string('qrcode');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tickets_payments');
+        Schema::dropIfExists('ticket_payments');
     }
 };

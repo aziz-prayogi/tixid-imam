@@ -77,7 +77,7 @@
                             <a class="nav-link" href="{{ route('cinemas_list') }}">Bioskop</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Tiket</a>
+                            <a class="nav-link" href="{{ route('tickets.index') }}">Tiket</a>
                         </li>
                     @endif
                 </ul>
@@ -116,8 +116,9 @@
         integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous">
     </script>
 
-
     <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @stack('script')
 </body>

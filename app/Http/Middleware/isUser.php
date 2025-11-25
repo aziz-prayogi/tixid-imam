@@ -19,7 +19,7 @@ class isUser
         if (Auth::check() && Auth::user()->role == 'user') {
             return $next($request);
         } else {
-            return redirect()->route('login')->with('error','harap login terlebih dahulu');
+            return redirect()->route('login');
         }
 
     }

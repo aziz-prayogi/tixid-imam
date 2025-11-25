@@ -19,6 +19,21 @@ Route::get('/schedules/{scheduleId}/hours/{hourId}/ticket', [TicketController::c
 
 Route::middleware('isUser')->group(function () {
     Route::get('/schedules/{scheduleId}/hours/{hourId}/ticket', [TicketController::class, 'showSeats'])->name('schedules.show_seats');
+
+    Route::prefix('/tickets')->name('tickets.')->group(function() {
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/{ticketId}/order', [TicketController::class, 'ticketOrderPage'])->name('order');
+        //pembuatan barcode pembayaran
+        Route::post('/barcode', [TicketController::class, 'createBarcode'])->name('barcode');
+        //halaman yang menampilkan barcode pembayaran
+        Route::get('/{ticketId}/payment', [TicketController::class, 'ticketPaymentPage'])->name('payment.page');
+        Route::patch('/{ticketId}/payment/update', [TicketController::class, 'updateStatusTicket'])->name('payment.update');
+
+        Route::get('/{ticketId}/show', [TicketController::class, 'show'])->name('show');
+        Route::get('/{ticketId}/export/pdf', [TicketController::class, 'exportPdf'])->name('export.pdf');
+        Route::get('/list', [TicketController::class, 'index'])->name('index');
+
+    });
 });
 
 Route::get('/login', function () {
@@ -45,6 +60,7 @@ Route::get('/logout', [UserController::class, 'logout'])
 // group : mengelompokkan route agar mengikuti sifat sebelumnya (sebelumnya = middleware)
 // prefix() : awalan path, agar /admin ditulis 1 kali tapi bisa digunakan berkali kali
 Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function() {
+    Route::get('/ticket/chart', [TicketController::class, 'dataChart'])->name('tickets.chart');
     // admin dashboard disimpan di group middleware agar dapat menggunakan middleware tsb.
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -95,6 +111,7 @@ Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function()
         Route::delete('/delete-permanent/{id}', [UserController::class, 'deletePermanent'])->name('delete_permanent');
     });
     Route::prefix('/movies')->name('movies.')->group(function() {
+        Route::get('/chart', [MovieController::class, 'chart'])->name('chart');
         Route::get('/datatables', [MovieController::class, 'datatables'])->name('datatables');
         Route::get('/', [MovieController::class, 'index'])->name('index');
         Route::get('/create', [MovieController::class, 'create'])->name('create');

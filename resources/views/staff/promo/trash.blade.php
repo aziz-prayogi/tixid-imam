@@ -26,7 +26,7 @@
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $item->promo_code }}</td>
                     <td>
-                        @if ($item->type == 'percent')
+                        @if ($item->type == 'percentage')
                             {{ $item->discount }}%
                         @else
                             Rp {{ number_format($item->discount, 0, ',', '.') }}

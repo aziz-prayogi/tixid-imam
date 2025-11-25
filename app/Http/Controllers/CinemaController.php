@@ -168,7 +168,7 @@ class CinemaController extends Controller
         return view('schedule.cinema', compact('cinemas'));
     }
 
-    public function cinemaSchedules($cinema_id) {
+     public function cinemaSchedules($cinema_id) {
     $schedules = Schedule::where('cinema_id', $cinema_id)->with('movie')->whereHas('movie', function($q){
         $q->where('activated', 1);
     })->get();

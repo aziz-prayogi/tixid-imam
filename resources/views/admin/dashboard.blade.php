@@ -9,6 +9,94 @@
             </div>
 
         @endif
+        <div class="row mt-5">
+            <div class="col-6">
+                <canvas id="chartBar"></canvas>
+            </div>
+            <div class="col-6">
+                <canvas id="chartPie"></canvas>
+            </div>
+        </div>
     </div>
 
 @endsection
+@push('script')
+    <script>
+        let labels = null;
+        let data = null;
+        let dataPie = null;
+
+        $(function() {
+            $.ajax({
+                url: "{{ route('admin.tickets.chart') }}",
+                method: "GET",
+
+                success: function(response) {
+                    labels = response.labels;
+                    data = response.data;
+                    chartBar();
+                },
+                error: function(err) {
+                    alert('gagal mengambil data untuk grafik')
+                }
+            })
+        });
+        $.ajax({
+            url: "{{ route('admin.movies.chart') }}",
+            method: "GET",
+
+            success: function(response) {
+                dataPie = response.data;
+                chartPie();
+            },
+            error: function(err) {
+                alert('gagal mengambil data untuk grafik')
+            }
+        });
+
+        const ctx = document.getElementById('chartBar');
+
+        function chartBar() {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'penjualan Ticket bulan ini',
+                        data: data,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        const ctx2 = document.getElementById('chartPie');
+        function chartPie() {
+            new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: [
+                                'film Aktif',
+                                'film non-aktif',
+                            ],
+                            datasets: [{
+                                label: 'Perbandingan Film Aktif dan Non-aktif',
+                                data: dataPie,
+                                backgroundColor: [
+                                'rgb(255, 99, 132)',
+                                'rgb(54, 162, 235)',
+                                ],
+                                hoverOffset: 4
+                            }]
+
+                    }
+                });
+            }
+    </script>
+@endpush
